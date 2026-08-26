@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mohd Ismail — Salesforce Administration Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12151A;
+    --surface:#1B2029;
+    --surface-2:#20262f;
+    --border:#2A303C;
+    --text:#E8EAED;
+    --muted:#8B93A1;
+    --gold:#D4A24C;
+    --teal:#3FBFAE;
+    --gold-dim: rgba(212,162,76,0.12);
+    --teal-dim: rgba(63,191,174,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .display{font-family:'Space Grotesk', sans-serif;}
+
+  a{color:inherit;}
+
+  .wrap{max-width:920px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- Breadcrumb strip ---------- */
+  .crumb{
+    border-bottom:1px solid var(--border);
+    padding:14px 0;
+    font-size:12px;
+    letter-spacing:0.06em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+  .crumb span{color:var(--gold);}
+
+  /* ---------- Header / record highlights ---------- */
+  header{padding:48px 0 32px;}
+  .obj-label{
+    display:inline-block;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--teal);
+    background:var(--teal-dim);
+    border:1px solid rgba(63,191,174,0.35);
+    padding:4px 10px;
+    border-radius:3px;
+    margin-bottom:18px;
+  }
+  h1{
+    font-size:42px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin-bottom:6px;
+  }
+  .role-line{
+    font-size:17px;
+    color:var(--muted);
+    margin-bottom:28px;
+  }
+  .role-line strong{color:var(--text); font-weight:500;}
+
+  .fields{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .field{
+    background:var(--surface);
+    padding:14px 16px;
+  }
+  .field .k{
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:5px;
+  }
+  .field .v{font-size:14px; font-weight:500;}
+  .status-dot{
+    display:inline-block;
+    width:7px; height:7px;
+    border-radius:50%;
+    background:var(--teal);
+    margin-right:6px;
+    box-shadow:0 0 0 3px var(--teal-dim);
+  }
+
+  @media (max-width:640px){
+    .fields{grid-template-columns:repeat(2, 1fr);}
+    h1{font-size:32px;}
+  }
+
+  /* ---------- Section headers ---------- */
+  .section{padding:56px 0;}
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:24px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:14px;
+  }
+  .section-head h2{
+    font-size:13px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .section-head .count{
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  /* ---------- Summary ---------- */
+  .summary p{
+    font-size:16px;
+    color:#C7CCD4;
+    max-width:70ch;
+  }
+
+  /* ---------- Project records ---------- */
+  .record{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:8px;
+    margin-bottom:16px;
+    overflow:hidden;
+    opacity:0;
+    transform:translateY(14px);
+    transition:opacity .5s ease, transform .5s ease, border-color .2s ease;
+  }
+  .record.in-view{opacity:1; transform:translateY(0);}
+  .record:hover{border-color:#3a4152;}
+
+  .record-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    padding:20px 22px 16px;
+  }
+  .record-title{
+    font-size:19px;
+    font-weight:600;
+    font-family:'Space Grotesk', sans-serif;
+    margin-bottom:4px;
+  }
+  .record-sub{
+    font-size:13px;
+    color:var(--muted);
+  }
+  .badge{
+    flex-shrink:0;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:5px 10px;
+    border-radius:20px;
+    white-space:nowrap;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .badge.build{
+    background:var(--gold-dim);
+    color:var(--gold);
+    border:1px solid rgba(212,162,76,0.35);
+  }
+  .badge.ready{
+    background:var(--teal-dim);
+    color:var(--teal);
+    border:1px solid rgba(63,191,174,0.35);
+  }
+
+  .record-body{
+    padding:0 22px 22px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+  }
+  @media (max-width:640px){
+    .record-body{grid-template-columns:1fr;}
+    .record-top{flex-direction:column;}
+  }
+
+  .rf-k{
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .rf-v{font-size:14px; color:#D5D9DF;}
+  .rf-v ul{padding-left:18px; margin-top:2px;}
+  .rf-v li{margin-bottom:3px;}
+
+  .shot{
+    grid-column:1 / -1;
+    border:1px dashed var(--border);
+    border-radius:6px;
+    padding:26px;
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    font-family:'IBM Plex Mono', monospace;
+    background:var(--surface-2);
+  }
+
+  /* ---------- Agentforce highlight record ---------- */
+  .record.featured{
+    border-color:rgba(212,162,76,0.4);
+    background:linear-gradient(180deg, rgba(212,162,76,0.05), var(--surface) 70%);
+  }
+  .featured .record-title{color:var(--gold);}
+
+  /* ---------- Skills ---------- */
+  .chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    font-size:12px;
+    font-family:'IBM Plex Mono', monospace;
+    background:var(--surface);
+    border:1px solid var(--border);
+    padding:6px 12px;
+    border-radius:4px;
+    color:#C7CCD4;
+  }
+
+  /* ---------- Footer ---------- */
+  footer{
+    border-top:1px solid var(--border);
+    padding:36px 0 60px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  footer .contact{font-size:13px; color:var(--muted);}
+  footer .contact a{color:var(--teal); text-decoration:none;}
+  footer .contact a:hover{text-decoration:underline;}
+  footer .tag{
+    font-size:11px;
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .record{transition:none; opacity:1; transform:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="crumb">
+    <div class="wrap">Portfolio <span>/</span> Salesforce Administration <span>/</span> Mohd Ismail</div>
+  </div>
+
+  <header>
+    <div class="wrap">
+      <div class="obj-label">● Record Type: Salesforce Administrator</div>
+      <h1>Mohd Ismail</h1>
+      <div class="role-line">Aspiring <strong>Salesforce Administrator</strong> — building hands-on CRM, automation, and Agentforce projects while pursuing certification</div>
+
+      <div class="fields">
+        <div class="field">
+          <div class="k">Status</div>
+          <div class="v"><span class="status-dot"></span>Actively seeking</div>
+        </div>
+        <div class="field">
+          <div class="k">Based in</div>
+          <div class="v">Mumbai, India</div>
+        </div>
+        <div class="field">
+          <div class="k">Relocation</div>
+          <div class="v">UAE / EU — open</div>
+        </div>
+        <div class="field">
+          <div class="k">Certification</div>
+          <div class="v">Admin — In Progress</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="section summary">
+      <div class="section-head"><h2>Summary</h2></div>
+      <p>Data operations professional with 2+ years managing structured workflows, validation, and reporting across sports-analytics environments. Currently building Salesforce Administration expertise through self-directed Trailhead study and hands-on configuration projects — including CRM workflow design, automation, and an Agentforce agent build. Each project below documents a real business scenario, what was configured, and what it demonstrates.</p>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Related Projects</h2>
+        <span class="count">6 records</span>
+      </div>
+
+      <!-- Featured: Agentforce -->
+      <div class="record featured">
+        <div class="record-top">
+          <div>
+            <div class="record-title">Agentforce Support Agent — Tier-1 Ticket Triage</div>
+            <div class="record-sub">Agentforce Builder · Developer Edition Org</div>
+          </div>
+          <span class="badge build">In Progress</span>
+        </div>
+        <div class="record-body">
+          <div>
+            <div class="rf-k">Business Problem</div>
+            <div class="rf-v">A support team needs first-line responses to common questions answered instantly, with anything complex handed to a human — without losing context.</div>
+          </div>
+          <div>
+            <div class="rf-k">What Was Built</div>
+            <div class="rf-v"><ul>
+              <li>Agent built in Agentforce Builder with a defined conversation scope</li>
+              <li>Prompt Template grounding answers in a knowledge source</li>
+              <li>Escalation path to a Screen Flow that creates a case record with full conversation context</li>
+            </ul></div>
+          </div>
+          <div>
+            <div class="rf-k">Why It Matters</div>
+            <div class="rf-v">Shows hands-on Agentforce experience — one of the most active areas of the platform in 2026, and still rare on most admin resumes.</div>
+          </div>
+          <div>
+            <div class="rf-k">What I'd Improve</div>
+            <div class="rf-v">Add guardrails for out-of-scope questions and test escalation accuracy across more edge cases.</div>
+          </div>
+          <div class="shot">[ Screenshot: agent conversation preview ] · [ Screenshot: escalation Flow ]</div>
+        </div>
+      </div>
+
+      <!-- Flow automation -->
+      <div class="record">
+        <div class="record-top">
+          <div>
+            <div class="record-title">Lead Routing Automation</div>
+            <div class="record-sub">Flow Builder · Record-Triggered Flow</div>
+          </div>
+          <span class="badge build">Planned</span>
+        </div>
+        <div class="record-body">
+          <div>
+            <div class="rf-k">Business Problem</div>
+            <div class="rf-v">Inbound leads need to reach the right rep by region without manual sorting.</div>
+          </div>
+          <div>
+            <div class="rf-k">What Was Built</div>
+            <div class="rf-v"><ul>
+              <li>Record-Triggered Flow assigning leads by state/region field</li>
+              <li>Decision elements for tier-based routing</li>
+              <li>Email alert to assigned rep on match</li>
+            </ul></div>
+          </div>
+          <div>
+            <div class="rf-k">Why It Matters</div>
+            <div class="rf-v">Core declarative automation skill — the most commonly tested admin competency in interviews.</div>
+          </div>
+          <div>
+            <div class="rf-k">What I'd Improve</div>
+            <div class="rf-v">Add round-robin fallback for reps at capacity.</div>
+          </div>
+          <div class="shot">[ Screenshot: Flow canvas ] · [ Screenshot: routed lead record ]</div>
+        </div>
+      </div>
+
+      <!-- Security model -->
+      <div class="record">
+        <div class="record-top">
+          <div>
+            <div class="record-title">Multi-Department Security Model</div>
+            <div class="record-sub">Profiles · Permission Sets · Role Hierarchy</div>
+          </div>
+          <span class="badge build">Planned</span>
+        </div>
+        <div class="record-body">
+          <div>
+            <div class="rf-k">Business Problem</div>
+            <div class="rf-v">Sales, Support, and Finance teams need access to shared records without seeing each other's sensitive fields.</div>
+          </div>
+          <div>
+            <div class="rf-k">What Was Built</div>
+            <div class="rf-v"><ul>
+              <li>Role hierarchy reflecting org reporting structure</li>
+              <li>Permission sets layered on baseline profiles per department</li>
+              <li>Field-level security on sensitive financial fields</li>
+            </ul></div>
+          </div>
+          <div>
+            <div class="rf-k">Why It Matters</div>
+            <div class="rf-v">Access control is core, unglamorous admin work that most portfolios skip — showing it signals real operational understanding.</div>
+          </div>
+          <div>
+            <div class="rf-k">What I'd Improve</div>
+            <div class="rf-v">Document a sharing-rule exception for cross-department deal collaboration.</div>
+          </div>
+          <div class="shot">[ Screenshot: role hierarchy ] · [ Screenshot: permission set assignment ]</div>
+        </div>
+      </div>
+
+      <!-- Reports & dashboards -->
+      <div class="record">
+        <div class="record-top">
+          <div>
+            <div class="record-title">Sales Performance Dashboard</div>
+            <div class="record-sub">Reports · Dashboards · Report Types</div>
+          </div>
+          <span class="badge build">Planned</span>
+        </div>
+        <div class="record-body">
+          <div>
+            <div class="rf-k">Business Problem</div>
+            <div class="rf-v">Sales leadership needs a single view of pipeline health, win rate, and rep performance.</div>
+          </div>
+          <div>
+            <div class="rf-k">What Was Built</div>
+            <div class="rf-v"><ul>
+              <li>Custom report types joining Opportunity and Account data</li>
+              <li>Dashboard with pipeline-by-stage and rep-leaderboard components</li>
+              <li>Scheduled weekly refresh and email delivery</li>
+            </ul></div>
+          </div>
+          <div>
+            <div class="rf-k">Why It Matters</div>
+            <div class="rf-v">Reporting is what most stakeholders actually interact with day to day — this is a highly visible admin skill.</div>
+          </div>
+          <div>
+            <div class="rf-k">What I'd Improve</div>
+            <div class="rf-v">Add a forecast-accuracy component comparing committed vs. closed.</div>
+          </div>
+          <div class="shot">[ Screenshot: dashboard view ]</div>
+        </div>
+      </div>
+
+      <!-- Freshdesk (existing) -->
+      <div class="record">
+        <div class="record-top">
+          <div>
+            <div class="record-title">Freshdesk Support Workflow Simulation</div>
+            <div class="record-sub">Ticketing · SLA Policies · Reporting</div>
+          </div>
+          <span class="badge ready">Complete</span>
+        </div>
+        <div class="record-body">
+          <div>
+            <div class="rf-k">Business Problem</div>
+            <div class="rf-v">A support team needs SLA-backed ticket handling with visibility into agent performance.</div>
+          </div>
+          <div>
+            <div class="rf-k">What Was Built</div>
+            <div class="rf-v"><ul>
+              <li>Custom ticket fields, SLA policies, automated email workflows</li>
+              <li>Agent groups and ticket queues</li>
+              <li>Dashboard tracking response time and resolution SLAs</li>
+            </ul></div>
+          </div>
+          <div>
+            <div class="rf-k">Why It Matters</div>
+            <div class="rf-v">Demonstrates CRM/helpdesk configuration thinking directly transferable to Salesforce Service Cloud concepts.</div>
+          </div>
+          <div>
+            <div class="rf-k">What I'd Improve</div>
+            <div class="rf-v">Add CSAT survey trigger on ticket close.</div>
+          </div>
+          <div class="shot">[ Screenshot: SLA dashboard ] · [ Screenshot: ticket queue setup ]</div>
+        </div>
+      </div>
+
+      <!-- Zendesk (existing) -->
+      <div class="record">
+        <div class="record-top">
+          <div>
+            <div class="record-title">Zendesk Ticketing System Setup</div>
+            <div class="record-sub">Multi-Channel Routing · Automation Rules</div>
+          </div>
+          <span class="badge ready">Complete</span>
+        </div>
+        <div class="record-body">
+          <div>
+            <div class="rf-k">Business Problem</div>
+            <div class="rf-v">Support requests arrive across email and web forms and need consistent, intelligent routing.</div>
+          </div>
+          <div>
+            <div class="rf-k">What Was Built</div>
+            <div class="rf-v"><ul>
+              <li>Multi-channel workflow integrating email and web-form ticketing</li>
+              <li>Automations, triggers, and business rules for routing</li>
+              <li>Dashboard tracking first-response time, resolution time, CSAT</li>
+            </ul></div>
+          </div>
+          <div>
+            <div class="rf-k">Why It Matters</div>
+            <div class="rf-v">Reinforces the same operational patterns Salesforce Service Cloud admins configure daily.</div>
+          </div>
+          <div>
+            <div class="rf-k">What I'd Improve</div>
+            <div class="rf-v">Add auto-tagging based on ticket keyword detection.</div>
+          </div>
+          <div class="shot">[ Screenshot: routing rules ] · [ Screenshot: CSAT dashboard ]</div>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Skills</h2></div>
+      <div class="chip-row">
+        <span class="chip">Salesforce Navigation & UI</span>
+        <span class="chip">Objects & Field Relationships</span>
+        <span class="chip">Flow Builder</span>
+        <span class="chip">Agentforce Builder</span>
+        <span class="chip">Reports & Dashboards</span>
+        <span class="chip">Security & Access Model</span>
+        <span class="chip">Data Validation & Quality Review</span>
+        <span class="chip">Excel — INDEX/MATCH, SUMIFS, Pivot Tables</span>
+        <span class="chip">SQL Fundamentals</span>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="wrap" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; width:100%;">
+      <div class="contact">
+        <a href="mailto:mohdismail2424@gmail.com">mohdismail2424@gmail.com</a> ·
+        <a href="https://www.linkedin.com/in/mohdismail24/" target="_blank">LinkedIn</a> ·
+        <a href="https://www.salesforce.com/trailblazer/trqrcv27dwbjzwjg37" target="_blank">Trailblazer Profile</a>
+      </div>
+      <div class="tag">last updated · <span id="today"></span></div>
+    </div>
+  </footer>
+
+<script>
+  document.getElementById('today').textContent = new Date().toLocaleDateString('en-GB', { year:'numeric', month:'short' });
+
+  const records = document.querySelectorAll('.record');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        e.target.classList.add('in-view');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  records.forEach(r => io.observe(r));
+</script>
+
+</body>
+</html>
